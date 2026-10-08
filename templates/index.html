@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<title>BanglaOSINT</title>
+
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+margin:0;
+background:#05070a;
+color:#e9eef5;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+header{
+padding:22px;
+border-bottom:1px solid #18212b;
+background:#080b10;
+}
+
+h1{
+margin:0;
+font-size:25px;
+letter-spacing:2px;
+}
+
+.sub{
+color:#778493;
+font-size:12px;
+margin-top:7px;
+}
+
+.tabs{
+display:flex;
+gap:8px;
+padding:14px;
+overflow-x:auto;
+background:#080b10;
+border-bottom:1px solid #18212b;
+}
+
+.tab{
+border:1px solid #26313d;
+background:#0c1117;
+color:#9ba8b6;
+padding:11px 15px;
+border-radius:9px;
+white-space:nowrap;
+cursor:pointer;
+}
+
+.tab.active{
+background:#171f28;
+color:white;
+border-color:#566678;
+}
+
+.panel{
+padding:15px;
+}
+
+.mode{
+display:none;
+}
+
+.mode.active{
+display:block;
+}
+
+input,select{
+width:100%;
+padding:14px;
+background:#090d12;
+color:white;
+border:1px solid #26313d;
+border-radius:9px;
+outline:none;
+margin-bottom:10px;
+}
+
+button{
+padding:12px 16px;
+background:#101820;
+color:#fff;
+border:1px solid #344454;
+border-radius:8px;
+cursor:pointer;
+margin:3px;
+}
+
+button:hover{
+background:#18232e;
+}
+
+.action{
+display:flex;
+flex-wrap:wrap;
+gap:6px;
+}
+
+.card{
+background:#080d12;
+border:1px solid #1c2732;
+border-radius:12px;
+padding:15px;
+margin-top:12px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+gap:9px;
+}
+
+.item{
+background:#0c1218;
+border:1px solid #1b2630;
+border-radius:8px;
+padding:11px;
+}
+
+.label{
+font-size:10px;
+color:#718090;
+text-transform:uppercase;
+}
+
+.value{
+font-size:14px;
+margin-top:5px;
+word-break:break-word;
+}
+
+#map{
+height:430px;
+margin-top:12px;
+border-radius:12px;
+overflow:hidden;
+}
+
+pre{
+white-space:pre-wrap;
+word-break:break-word;
+color:#9fb0bf;
+}
+
+.result{
+padding:10px;
+margin:7px 0;
+border:1px solid #202c37;
+background:#0b1117;
+border-radius:8px;
+}
+
+.found{
+border-left:4px solid #47d18c;
+}
+
+.notfound{
+border-left:4px solid #586574;
+}
+
+a{
+color:#72b7ff;
+text-decoration:none;
+}
+
+.status{
+margin-top:10px;
+font-size:12px;
+color:#8d9aaa;
+}
+
+.warning{
+font-size:12px;
+color:#c8a86b;
+line-height:1.5;
+}
+
+.photo-preview{
+max-width:100%;
+max-height:320px;
+border-radius:10px;
+display:none;
+margin-top:12px;
+border:1px solid #26313d;
+}
+
+.search-links{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+}
+
+.search-links a{
+display:inline-block;
+padding:11px 13px;
+border:1px solid #2b3947;
+border-radius:8px;
+background:#0c131a;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>BanglaOSINT</h1>
+
+<div class="sub">
+PUBLIC OSINT / NETWORK INTELLIGENCE
+</div>
+
+</header>
+
+
+<div class="tabs">
+
+<button class="tab active"
+onclick="switchMode('ip',this)">
+IP INTELLIGENCE
+</button>
+
+<button class="tab"
+onclick="switchMode('username',this)">
+PUBLIC USERNAME
+</button>
+
+<button class="tab"
+onclick="switchMode('phone',this)">
+PHONE INSPECTION
+</button>
+
+<button class="tab"
+onclick="switchMode('image',this)">
+IMAGE INSPECTION
+</button>
+
+</div>
+
+
+<div class="panel">
+
+
+<!-- ================================================= -->
+<!-- IP -->
+<!-- ================================================= -->
+
+<section id="ip"
+class="mode active">
+
+<div class="card">
+
+<input
+id="ipInput"
+placeholder="Example: 8.8.8.8"
+autocomplete="off"
+/>
+
+<div class="action">
+
+<button onclick="lookupIP()">
+LOOKUP IP
+</button>
+
+<button onclick="traceIP()">
+TRACE ROUTE
+</button>
+
+</div>
+
+<div id="ipStatus"
+class="status">
+Ready.
+</div>
+
+</div>
+
+
+<div id="ipInfo"
+class="card"
+style="display:none">
+
+<div class="grid">
+
+<div class="item">
+<div class="label">IP</div>
+<div id="ip"></div>
+</div>
+
+<div class="item">
+<div class="label">Country</div>
+<div id="country"></div>
+</div>
+
+<div class="item">
+<div class="label">Region</div>
+<div id="region"></div>
+</div>
+
+<div class="item">
+<div class="label">City</div>
+<div id="city"></div>
+</div>
+
+<div class="item">
+<div class="label">ISP</div>
+<div id="isp"></div>
+</div>
+
+<div class="item">
+<div class="label">Organization</div>
+<div id="org"></div>
+</div>
+
+<div class="item">
+<div class="label">ASN</div>
+<div id="asn"></div>
+</div>
+
+<div class="item">
+<div class="label">Timezone</div>
+<div id="timezone"></div>
+</div>
+
+</div>
+
+</div>
+
+
+<div id="map"></div>
+
+
+<div id="hops"
+class="card"
+style="display:none">
+
+<h3>Traceroute Hops</h3>
+
+<div id="hopList"></div>
+
+</div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- USERNAME -->
+<!-- ================================================= -->
+
+<section id="username"
+class="mode">
+
+<div class="card">
+
+<input
+id="usernameInput"
+placeholder="username / @username"
+/>
+
+<button onclick="searchUsername()">
+SEARCH PUBLIC PROFILES
+</button>
+
+<div class="warning">
+শুধু publicly accessible profile URL পরীক্ষা করা হয়।
+FOUND মানেই account ownership প্রমাণিত নয়।
+</div>
+
+<div id="usernameStatus"
+class="status">
+Ready.
+</div>
+
+</div>
+
+<div id="usernameResults"
+class="card"
+style="display:none">
+
+<div id="usernameList"></div>
+
+</div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- PHONE -->
+<!-- ================================================= -->
+
+<section id="phone"
+class="mode">
+
+<div class="card">
+
+<input
+id="phoneInput"
+placeholder="+8801XXXXXXXXX"
+/>
+
+<select id="phoneRegion">
+
+<option value="BD">
+Bangladesh (BD)
+</option>
+
+<option value="IN">
+India (IN)
+</option>
+
+<option value="US">
+United States (US)
+</option>
+
+<option value="GB">
+United Kingdom (GB)
+</option>
+
+<option value="AE">
+United Arab Emirates (AE)
+</option>
+
+<option value="SA">
+Saudi Arabia (SA)
+</option>
+
+<option value="MY">
+Malaysia (MY)
+</option>
+
+<option value="SG">
+Singapore (SG)
+</option>
+
+</select>
+
+<button onclick="inspectPhone()">
+INSPECT NUMBER
+</button>
+
+<div class="warning">
+নম্বর থেকে private/local IP বা hidden/private account বের করা যায় না।
+এখানে public phone metadata এবং public web search দেওয়া হচ্ছে।
+</div>
+
+<div id="phoneStatus"
+class="status">
+Ready.
+</div>
+
+</div>
+
+
+<div id="phoneInfo"
+class="card"
+style="display:none">
+
+<div class="grid">
+
+<div class="item">
+<div class="label">E.164</div>
+<div id="phoneE164"></div>
+</div>
+
+<div class="item">
+<div class="label">International</div>
+<div id="phoneInternational"></div>
+</div>
+
+<div class="item">
+<div class="label">Country</div>
+<div id="phoneCountry"></div>
+</div>
+
+<div class="item">
+<div class="label">Number Type</div>
+<div id="phoneType"></div>
+</div>
+
+<div class="item">
+<div class="label">Carrier</div>
+<div id="phoneCarrier"></div>
+</div>
+
+<div class="item">
+<div class="label">Possible</div>
+<div id="phonePossible"></div>
+</div>
+
+<div class="item">
+<div class="label">Valid</div>
+<div id="phoneValid"></div>
+</div>
+
+<div class="item">
+<div class="label">Timezone</div>
+<div id="phoneTimezone"></div>
+</div>
+
+</div>
+
+<h3>Public Web Search</h3>
+
+<div
+id="phoneSearchLinks"
+class="search-links">
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- IMAGE -->
+<!-- ================================================= -->
+
+<section id="image"
+class="mode">
+
+<div class="card">
+
+<input
+id="imageInput"
+type="file"
+accept="image/*"
+onchange="previewImage(event)"
+/>
+
+<img
+id="preview"
+class="photo-preview"
+/>
+
+<button onclick="inspectImage()">
+INSPECT IMAGE
+</button>
+
+<div class="warning">
+ছবির metadata/hash দেখা হবে। Reverse-image search-এর জন্য
+public services-এর links দেওয়া হবে।
+</div>
+
+<div id="imageStatus"
+class="status">
+Ready.
+</div>
+
+</div>
+
+
+<div id="imageInfo"
+class="card"
+style="display:none">
+
+<div class="grid">
+
+<div class="item">
+<div class="label">Filename</div>
+<div id="imgFilename"></div>
+</div>
+
+<div class="item">
+<div class="label">Size</div>
+<div id="imgSize"></div>
+</div>
+
+<div class="item">
+<div class="label">Dimensions</div>
+<div id="imgDimensions"></div>
+</div>
+
+<div class="item">
+<div class="label">Format</div>
+<div id="imgFormat"></div>
+</div>
+
+<div class="item">
+<div class="label">Mode</div>
+<div id="imgMode"></div>
+</div>
+
+<div class="item">
+<div class="label">SHA-256</div>
+<div id="imgHash"></div>
+</div>
+
+</div>
+
+
+<h3>EXIF Metadata</h3>
+
+<pre id="imgExif"></pre>
+
+
+<h3>Public Reverse Image Search</h3>
+
+<div
+id="reverseLinks"
+class="search-links">
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+<script>
+
+let map = L.map("map").setView(
+[23.8103,90.4125],
+5
+);
+
+L.tileLayer(
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+{
+maxZoom:19,
+attribution:"© OpenStreetMap"
+}
+).addTo(map);
+
+let targetMarker = null;
+let hopMarkers = [];
+
+
+function switchMode(mode, button){
+
+document.querySelectorAll(".mode")
+.forEach(el=>{
+el.classList.remove("active");
+});
+
+document.getElementById(mode)
+.classList.add("active");
+
+document.querySelectorAll(".tab")
+.forEach(el=>{
+el.classList.remove("active");
+});
+
+button.classList.add("active");
+
+if(mode === "ip"){
+setTimeout(()=>{
+map.invalidateSize();
+},100);
+}
+
+}
+
+
+function lookupIP(){
+
+const ip =
+document.getElementById("ipInput")
+.value
+.trim();
+
+if(!ip){
+return;
+}
+
+document.getElementById("ipStatus")
+.textContent =
+"Looking up public IP intelligence...";
+
+fetch(
+"/api/ip?ip=" +
+encodeURIComponent(ip)
+)
+
+.then(r=>r.json())
+
+.then(data=>{
+
+if(!data.ok){
+throw new Error(data.error);
+}
+
+document.getElementById("ipInfo")
+.style.display="block";
+
+document.getElementById("ip")
+.textContent=data.ip;
+
+document.getElementById("country")
+.textContent=
+(data.country || "") +
+" " +
+(data.country_code || "");
+
+document.getElementById("region")
+.textContent=data.region || "-";
+
+document.getElementById("city")
+.textContent=data.city || "-";
+
+document.getElementById("isp")
+.textContent=data.isp || "-";
+
+document.getElementById("org")
+.textContent=data.org || "-";
+
+document.getElementById("asn")
+.textContent=data.asn || "-";
+
+document.getElementById("timezone")
+.textContent=data.timezone || "-";
+
+drawTarget(
+data.latitude,
+data.longitude,
+data.ip
+);
+
+document.getElementById("ipStatus")
+.textContent =
+"Public IP information loaded.";
+
+})
+
+.catch(err=>{
+
+document.getElementById("ipStatus")
+.textContent =
+"ERROR: " + err.message;
+
+});
+
+}
+
+
+function drawTarget(lat,lon,label){
+
+if(targetMarker){
+map.removeLayer(targetMarker);
+}
+
+targetMarker =
+L.marker([lat,lon])
+.addTo(map)
+.bindPopup(
+"<b>Target</b><br>" +
+label
+)
+.openPopup();
+
+map.setView(
+[lat,lon],
+8
+);
+
+}
+
+
+function clearHopMarkers(){
+
+hopMarkers.forEach(
+marker=>map.removeLayer(marker)
+);
+
+hopMarkers=[];
+
+}
+
+
+function traceIP(){
+
+const ip =
+document.getElementById("ipInput")
+.value
+.trim();
+
+if(!ip){
+return;
+}
+
+document.getElementById("ipStatus")
+.textContent =
+"Running traceroute...";
+
+clearHopMarkers();
+
+fetch(
+"/api/trace?ip=" +
+encodeURIComponent(ip)
+)
+
+.then(r=>r.json())
+
+.then(data=>{
+
+if(!data.ok){
+throw new Error(data.error);
+}
+
+const list =
+document.getElementById("hopList");
+
+list.innerHTML="";
+
+document.getElementById("hops")
+.style.display="block";
+
+const points=[];
+
+data.hops.forEach(hop=>{
+
+const row =
+document.createElement("div");
+
+row.className="result";
+
+row.innerHTML =
+"<b>Hop " +
+hop.hop +
+"</b> — " +
+(hop.ip || "*") +
+"<br>" +
+"Latency: " +
+(hop.latency_ms ?? "-") +
+" ms<br>" +
+(hop.city || "") +
+" " +
+(hop.country || "") +
+"<br>" +
+(hop.isp || "");
+
+list.appendChild(row);
+
+if(
+hop.lat !== undefined &&
+hop.lon !== undefined
+){
+
+const marker =
+L.marker([
+hop.lat,
+hop.lon
+])
+.addTo(map)
+.bindPopup(
+"<b>Hop " +
+hop.hop +
+"</b><br>" +
+(hop.ip || "") +
+"<br>" +
+(hop.city || "") +
+"<br>" +
+(hop.country || "")
+);
+
+hopMarkers.push(marker);
+
+points.push([
+hop.lat,
+hop.lon
+]);
+
+}
+
+});
+
+if(points.length > 1){
+
+L.polyline(
+points,
+{
+color:"red",
+dashArray:"7,7",
+weight:2
+}
+).addTo(map);
+
+}
+
+document.getElementById("ipStatus")
+.textContent =
+"Traceroute complete.";
+
+})
+
+.catch(err=>{
+
+document.getElementById("ipStatus")
+.textContent =
+"ERROR: " + err.message;
+
+});
+
+}
+
+
+function searchUsername(){
+
+const username =
+document.getElementById("usernameInput")
+.value
+.trim();
+
+if(!username){
+return;
+}
+
+document.getElementById("usernameStatus")
+.textContent =
+"Checking public profile URLs...";
+
+fetch(
+"/api/username?username=" +
+encodeURIComponent(username)
+)
+
+.then(r=>r.json())
+
+.then(data=>{
+
+if(!data.ok){
+throw new Error(data.error);
+}
+
+const box =
+document.getElementById("usernameList");
+
+box.innerHTML="";
+
+document.getElementById("usernameResults")
+.style.display="block";
+
+data.results.forEach(item=>{
+
+const div =
+document.createElement("div");
+
+div.className =
+"result " +
+(item.exists ? "found" : "notfound");
+
+div.innerHTML =
+
+"<b>" +
+item.site +
+"</b><br>" +
+
+"Status: " +
+(
+item.exists
+? "PUBLIC URL FOUND"
+: "NOT FOUND / UNAVAILABLE"
+) +
+
+"<br>" +
+
+"<a href=\"" +
+item.final_url +
+"\" target=\"_blank\" rel=\"noopener\">" +
+"Open public page" +
+"</a>";
+
+box.appendChild(div);
+
+});
+
+document.getElementById("usernameStatus")
+.textContent =
+"Public profile check complete.";
+
+})
+
+.catch(err=>{
+
+document.getElementById("usernameStatus")
+.textContent =
+"ERROR: " + err.message;
+
+});
+
+}
+
+
+function inspectPhone(){
+
+const number =
+document.getElementById("phoneInput")
+.value
+.trim();
+
+const region =
+document.getElementById("phoneRegion")
+.value;
+
+if(!number){
+return;
+}
+
+document.getElementById("phoneStatus")
+.textContent =
+"Inspecting phone number metadata...";
+
+fetch(
+"/api/phone?number=" +
+encodeURIComponent(number) +
+"&region=" +
+encodeURIComponent(region)
+)
+
+.then(r=>r.json())
+
+.then(data=>{
+
+if(!data.ok){
+throw new Error(data.error);
+}
+
+document.getElementById("phoneInfo")
+.style.display="block";
+
+document.getElementById("phoneE164")
+.textContent=data.e164;
+
+document.getElementById("phoneInternational")
+.textContent=data.international;
+
+document.getElementById("phoneCountry")
+.textContent=data.country || "-";
+
+document.getElementById("phoneType")
+.textContent=data.type;
+
+document.getElementById("phoneCarrier")
+.textContent=data.carrier;
+
+document.getElementById("phonePossible")
+.textContent=data.possible;
+
+document.getElementById("phoneValid")
+.textContent=data.valid;
+
+document.getElementById("phoneTimezone")
+.textContent=
+(data.timezone || []).join(", ") || "-";
+
+const links =
+document.getElementById(
+"phoneSearchLinks"
+);
+
+links.innerHTML="";
+
+const names={
+google:"Google",
+bing:"Bing",
+duckduckgo:"DuckDuckGo"
+};
+
+Object.entries(
+data.public_search
+).forEach(([key,url])=>{
+
+const a =
+document.createElement("a");
+
+a.href=url;
+
+a.target="_blank";
+
+a.rel="noopener";
+
+a.textContent =
+"Search on " +
+(names[key] || key);
+
+links.appendChild(a);
+
+});
+
+document.getElementById("phoneStatus")
+.textContent =
+"Phone metadata loaded.";
+
+})
+
+.catch(err=>{
+
+document.getElementById("phoneStatus")
+.textContent =
+"ERROR: " + err.message;
+
+});
+
+}
+
+
+function previewImage(event){
+
+const file =
+event.target.files[0];
+
+if(!file){
+return;
+}
+
+const preview =
+document.getElementById("preview");
+
+preview.src =
+URL.createObjectURL(file);
+
+preview.style.display="block";
+
+}
+
+
+function inspectImage(){
+
+const input =
+document.getElementById("imageInput");
+
+if(!input.files.length){
+return;
+}
+
+const form =
+new FormData();
+
+form.append(
+"image",
+input.files[0]
+);
+
+document.getElementById("imageStatus")
+.textContent =
+"Inspecting image...";
+
+fetch(
+"/api/image",
+{
+method:"POST",
+body:form
+}
+)
+
+.then(r=>r.json())
+
+.then(data=>{
+
+if(!data.ok){
+throw new Error(data.error);
+}
+
+document.getElementById("imageInfo")
+.style.display="block";
+
+document.getElementById("imgFilename")
+.textContent=data.filename;
+
+document.getElementById("imgSize")
+.textContent=
+data.size_bytes + " bytes";
+
+document.getElementById("imgDimensions")
+.textContent=
+data.width +
+" × " +
+data.height;
+
+document.getElementById("imgFormat")
+.textContent=data.format;
+
+document.getElementById("imgMode")
+.textContent=data.mode;
+
+document.getElementById("imgHash")
+textContent=data.sha256;
+
+document.getElementById("imgExif")
+.textContent =
+Object.keys(data.exif).length
+? JSON.stringify(
+data.exif,
+null,
+2
+)
+: "No EXIF metadata found.";
+
+const links =
+document.getElementById(
+"reverseLinks"
+);
+
+links.innerHTML="";
+
+Object.entries(
+data.reverse_search
+).forEach(([name,url])=>{
+
+const a =
+document.createElement("a");
+
+a.href=url;
+
+a.target="_blank";
+
+a.rel="noopener";
+
+a.textContent=name;
+
+links.appendChild(a);
+
+});
+
+document.getElementById("imageStatus")
+.textContent =
+"Image inspection complete.";
+
+})
+
+.catch(err=>{
+
+document.getElementById("imageStatus")
+.textContent =
+"ERROR: " + err.message;
+
+});
+
+}
+
+</script>
+
+</body>
+
+</html>
